@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations.
+ */
+
+use Drupal\islandora\IslandoraUtils;
+use Drupal\media\MediaInterface;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function islandora_entity_status_media_presave(MediaInterface $media) {
+  if ($media->hasField(IslandoraUtils::MEDIA_OF_FIELD)) {
+    $media_of = $media->get(IslandoraUtils::MEDIA_OF_FIELD);
+    if (!$media_of->isEmpty()) {
+      $node = $media_of->referencedEntities()[0];
+      if ($node instanceof NodeInterface) {
+        $node_status = intval($node->status->value);
+        $media->set('status', $node_status);
+      }
+    }
+  }
+}
