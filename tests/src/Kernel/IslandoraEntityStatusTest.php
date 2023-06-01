@@ -13,7 +13,9 @@ use Drupal\Tests\islandora_test_support\Kernel\AbstractIslandoraKernelTestBase;
 class IslandoraEntityStatusTest extends AbstractIslandoraKernelTestBase {
 
   /**
-   * Modules to be installed during setup.
+   * Modules to install.
+   *
+   * @var array
    */
   protected static $modules = ['islandora_entity_status'];
 
