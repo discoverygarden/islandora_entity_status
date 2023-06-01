@@ -1,54 +1,12 @@
+---
 name: PHPUnit Tests
 on:
-  workflow_call:
-    inputs:
-      composer_prereqs:
-        required: false
-        type: string
-      composer_patches:
-        required: false
-        type: string
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
   PHPUnit:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        drupal-version: ['9.4']
-        php-version: ['7.4', '8.0']
-        experimental: [false]
-        include:
-          - drupal-version: '9'
-            php-version: '7.4'
-            experimental: true
-          - drupal-version: '9'
-            php-version: '8.1'
-            experimental: true
-          - drupal-version: '9.4'
-            php-version: '8.1'
-            experimental: true
-    continue-on-error: ${{ matrix.experimental }}
-    container:
-      image: drupal:${{ matrix.drupal-version }}-php${{ matrix.php-version }}
-      ports:
-        - 80
-    services:
-      postgres:
-        image: postgres
-        env:
-          POSTGRES_DB: drupal
-          POSTGRES_USER: drupal
-          POSTGRES_PASSWORD: drupal
-        # Set health checks to wait until postgres has started
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - name: Run PHPUnit Action
-        uses: discoverygarden/phpunit-action@v1
-        with:
-          composer_package_prerequisites: ${{ inputs.composer_prereqs }}
-          composer_patches: ${{ inputs.composer_patches }}
-          composer-auth: ${{ secrets.PRIVATE_PACKAGIST_AUTH_ACCESS }}
+    uses: discoverygarden/phpunit-action/.github/workflows/phpunit.yml@<current version constraint>
+    secrets: inherit
