@@ -7,6 +7,5 @@
     },
     "require-dev": {
         "discoverygarden/islandora_test_support": "^1"
-        "drupal/test_support": "^1"
     }
 }
