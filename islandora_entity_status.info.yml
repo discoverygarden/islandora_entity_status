@@ -1,0 +1,9 @@
+name: Islandora Entity Status
+description: Cascades entity status to all referenced entities and media in an Islandora repository item.
+type: module
+core_version_requirement: ^9
+dependencies:
+  - drupal:media
+  - drupal:node
+  - drupal:file
+  - islandora:islandora
