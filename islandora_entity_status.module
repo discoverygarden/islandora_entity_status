@@ -5,11 +5,12 @@
  * Hook implementations.
  */
 
-use Drupal\Core\Entity\EntityInterface;
 use Drupal\islandora\IslandoraUtils;
 use Drupal\media\MediaInterface;
 use Drupal\node\NodeInterface;
 use Drupal\media\Entity\Media;
+use Drupal\node\Entity\Node;
+use Twig\Markup;
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
@@ -30,23 +31,169 @@ function islandora_entity_status_media_presave(MediaInterface $media) {
 /**
  * Implements hook_entity_update().
  */
-function islandora_entity_status_entity_update(EntityInterface $entity) {
-  // Check if the entity is a node with the bundle "islandora_object".
+function islandora_entity_status_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
+  // Check if the entity is a node with the bundle "Repository Item".
   if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'islandora_object') {
     // Get the current node ID.
     $nid = $entity->id();
 
     // Query for media items that are associated with the current node.
     $query = \Drupal::entityQuery('media')
-      ->accessCheck(FALSE)
+      ->accessCheck(False)
       ->condition(IslandoraUtils::MEDIA_OF_FIELD, $nid);
     $media_ids = $query->execute();
 
-    // Load the media items and set their status to the same status as the node.
+    // Load the media items and set their status to the same status as the node
     $media_items = Media::loadMultiple($media_ids);
     foreach ($media_items as $media_item) {
       $media_item->set('status', $entity->get('status')->value);
       $media_item->save();
     }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function islandora_entity_status_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+  // Check if the form is for the Repository Item content type.
+  if ($form_id == 'node_islandora_object_edit_form') {
+    $relatedNode = [];
+
+    // Get the current node ID from the route parameters.
+    $currentNodeId = NULL;
+
+    // Check if the current route is a node edit page and if we have a valid node.
+    $node = \Drupal::routeMatch()->getParameter('node');
+    if ($node instanceof \Drupal\node\NodeInterface) {
+      $currentNodeId = $node->id();
+
+      // Load the nodes.
+      $relatedNodes = findCollectionNodes($currentNodeId);
+
+      if (!empty($relatedNodes)) {
+        $message = "If you are changing status of this node, same will reflect to other collection nodes";
+
+        // Attach the custom library.
+        $form['#attached']['library'][] = 'islandora_entity_status/confirm-popup';
+
+        // Pass the confirmation message to JavaScript.
+        $form['#attached']['drupalSettings']['custom_confirm_popup']['message'] = $message;
+      }
+    }
+  }
+}
+
+/**
+ * Find related nodes.
+ */
+function findCollectionNodes($currentNodeId) {
+  $relatedNodeIds = [];
+
+  // Initial query to find nodes where the field_member_of contains the current node ID.
+  $query = \Drupal::entityQuery('node')
+    ->condition('type', 'islandora_object') // Replace with your content type machine name
+    ->condition('field_member_of', $currentNodeId, '=')
+    ->accessCheck(FALSE);
+
+  $result = $query->execute();
+
+  // Load the initial set of nodes.
+  $relatedNodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($result);
+
+  // Check if any related nodes are found.
+  if (!empty($relatedNodes)) {
+    foreach ($relatedNodes as $relatedNode) {
+      $relatedNodeIds[] = $relatedNode->id();
+    }
+  }
+
+  return $relatedNodeIds;
+}
+
+/**
+ * Implements hook_node_insert() for node entities.
+ */
+function islandora_entity_status_node_insert($node) {
+  // Check if the node type is the Repository Item content type.
+  if ($node->getType() == 'islandora_object') {
+    // Trigger the batch process.
+    $node_ids_to_update = findCollectionNodes($node->id());
+    $node_status = $node->get('status');
+    islandora_entity_status_trigger_batch_process($node_ids_to_update, $node_status);
+  }
+}
+
+/**
+ * Implements hook_node_update() for node entities.
+ */
+function islandora_entity_status_node_update($node) {
+  // Check if the node type is the Repository Item content type.
+  if ($node->getType() == 'islandora_object') {
+    // Trigger the batch process.
+    $node_ids_to_update = findCollectionNodes($node->id());
+    $latestStatus = $node->get('status')->value;
+
+    islandora_entity_status_trigger_batch_process($node_ids_to_update, $latestStatus);
+  }
+}
+
+/**
+ * Helper function to trigger the batch process.
+ */
+function islandora_entity_status_trigger_batch_process($node_ids, $node_status) {
+  // Create a batch operation.
+  $operations = array(
+    array('islandora_entity_status_batch_operation', [$node_ids, $node_status]),
+  );
+
+  // Create a batch.
+  $batch = array(
+    'title' => t('Processing nodes'),
+    'operations' => $operations,
+    'finished' => 'islandora_entity_status_batch_finished',
+  );
+
+  // Add the batch to the queue.
+  batch_set($batch);
+}
+
+/**
+ * Batch operation callback.
+ */
+function islandora_entity_status_batch_operation($node_ids, $node_status, &$context) {
+  // Perform your batch processing here.
+  // Update the status for each related node.
+  foreach ($node_ids as $relatedNodeId) {
+    $relatedNode = Node::load($relatedNodeId);
+    $relatedNode->set('status', $node_status);
+    $relatedNode->save();
+
+    // Update the progress.
+    $context['results'][] = t('Node %node processed and status set to %status.',
+      ['%node' => $relatedNodeId, '%status' => $node_status]);
+  }
+}
+
+/**
+ * Batch finished callback.
+ */
+function islandora_entity_status_batch_finished($success, $results, $operations) {
+  $messenger = \Drupal::messenger();
+  $message = '';
+
+  if ($success) {
+    // Batch processing completed successfully.
+    // Display a message indicating success.
+    $messenger->addMessage(t('Batch processing completed successfully.'));
+    if (!empty($results)) {
+      foreach ($results as $result) {
+        $message .= '<br>' . $result;
+      }
+      $messenger->addMessage(new Markup($message, 'html'));
+    }
+  } else {
+    // Batch processing failed.
+    $messenger->addError(t('Batch processing failed.'));
   }
 }
