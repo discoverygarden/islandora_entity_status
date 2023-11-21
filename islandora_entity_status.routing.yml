@@ -1,0 +1,7 @@
+islandora_entity_status.node_edit_confirm:
+  path: '/confirm-edit/islandora_object'
+  defaults:
+    _form: '\Drupal\islandora_entity_status\Form\NodeEditConfirmForm'
+    _title: 'Confirm Edit'
+  requirements:
+    _permission: 'access content'
