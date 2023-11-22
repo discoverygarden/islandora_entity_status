@@ -79,6 +79,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $form = parent::buildForm($form, $form_state);
+
     // Retrieve data from temporary storage.
     $nodeEditData = $this->tempStoreData;;
 
@@ -102,6 +103,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
+
     // Perform any necessary logic before redirecting.
     // Trigger node save with data from session.
     $data = $this->tempStoreData;;
