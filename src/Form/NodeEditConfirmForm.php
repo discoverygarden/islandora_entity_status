@@ -81,7 +81,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
     $form = parent::buildForm($form, $form_state);
 
     // Retrieve data from temporary storage.
-    $nodeEditData = $this->tempStoreData;;
+    $nodeEditData = $this->tempStoreData;
 
     if (!$nodeEditData['node_id']) {
       $form_state->setRedirect(
@@ -106,7 +106,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
 
     // Perform any necessary logic before redirecting.
     // Trigger node save with data from session.
-    $data = $this->tempStoreData;;
+    $data = $this->tempStoreData;
 
     if (!empty($data) && is_array($data)) {
       // Load the node.
