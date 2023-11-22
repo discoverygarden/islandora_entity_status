@@ -2,12 +2,12 @@
 
 namespace Drupal\islandora_entity_status\Form;
 
+use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Url;
-use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Confirmation for editing a node.
@@ -34,6 +34,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
   public function __construct(PrivateTempStoreFactory $private_temp_store, EntityTypeManagerInterface $entity_type_manager) {
     $this->tempStore = $private_temp_store->get('islandora_entity_status');
     $this->entityTypeManager = $entity_type_manager;
+    $this->tempStoreData = $this->tempStore->get('node_edit_data');
   }
 
   /**
@@ -57,22 +58,28 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to edit this node? The status of its associated collection items will be changed to the same.<br><br>');
+    return $this->t('Are you sure you want to edit this node? ' .
+      'The status of its associated collection items will be ' .
+      'changed to the same.<br><br>');
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    return new Url('system.admin_content');
+    // Retrieve data from temporary storage
+    $data = $this->tempStoreData;
+    $currentNodeId = $data['node_id'];
+    return Url::fromRoute('entity.node.edit_form', ['node' => $currentNodeId]);
   }
 
   /**
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
-    // Retrieve data from temporary storage
-    $nodeEditData = $this->tempStore->get('node_edit_data');
+    $form = parent::buildForm($form, $form_state);
+    // Retrieve data from temporary storage.
+    $nodeEditData = $this->tempStoreData;;
 
     if (!$nodeEditData['node_id']) {
       $form_state->setRedirect('entity.node.edit_form', ['node' => $nodeEditData['node_id']]);
@@ -84,7 +91,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
       '#markup' => $this->getQuestion(),
     ];
 
-    return parent::buildForm($form, $form_state, 'node');
+    return $form;
   }
 
   /**
@@ -93,7 +100,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Perform any necessary logic before redirecting.
     // Trigger node save with data from session.
-    $data = $this->tempStore->get('node_edit_data');
+    $data = $this->tempStoreData;;
 
     if (!empty($data) && is_array($data)) {
       // Load the node.

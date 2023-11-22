@@ -27,7 +27,7 @@ class CustomDrushCommands extends DrushCommands {
       $this->updateRelatedNodes($nodeId, $status);
     }
 
-    $this->logger()->success(dt('Related nodes updated successfully.'));
+    $this->logger()->success($this->t('Related nodes updated successfully.'));
   }
 
   /**

@@ -5,14 +5,15 @@
  * Hook implementations.
  */
 
-use Drupal\islandora\IslandoraUtils;
-use Drupal\media\MediaInterface;
-use Drupal\node\NodeInterface;
-use Drupal\media\Entity\Media;
-use Drupal\node\Entity\Node;
-use Twig\Markup;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
-
+use Drupal\islandora\IslandoraUtils;
+use Drupal\media\Entity\Media;
+use Drupal\media\MediaInterface;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Twig\Markup;
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
@@ -33,7 +34,7 @@ function islandora_entity_status_media_presave(MediaInterface $media) {
 /**
  * Implements hook_entity_update().
  */
-function islandora_entity_status_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
+function islandora_entity_status_entity_update(EntityInterface $entity) {
   // Check if the entity is a node with the bundle "Repository Item".
   if ($entity->getEntityTypeId() == 'node' && $entity->bundle() == 'islandora_object') {
     // Get the current node ID.
@@ -41,11 +42,11 @@ function islandora_entity_status_entity_update(Drupal\Core\Entity\EntityInterfac
 
     // Query for media items that are associated with the current node.
     $query = \Drupal::entityQuery('media')
-      ->accessCheck(False)
+      ->accessCheck(FALSE)
       ->condition(IslandoraUtils::MEDIA_OF_FIELD, $nid);
     $media_ids = $query->execute();
 
-    // Load the media items and set their status to the same status as the node
+    // Load the media items and set their status to the same status as the node.
     $media_items = Media::loadMultiple($media_ids);
     foreach ($media_items as $media_item) {
       $media_item->set('status', $entity->get('status')->value);
@@ -57,9 +58,11 @@ function islandora_entity_status_entity_update(Drupal\Core\Entity\EntityInterfac
 /**
  * Implements hook_form_alter().
  */
-function islandora_entity_status_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+function islandora_entity_status_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // Check if the form is for the Repository Item content type.
   if ($form_id == 'node_islandora_object_edit_form') {
+    // We need to remove all submit method, inorder to make sure
+    // we redirect user to confirmation page.
     $form['actions']['submit']['#submit'] = ['islandoraEntityStatusNodeEditSubmit'];
   }
 }
@@ -67,15 +70,15 @@ function islandora_entity_status_form_alter(&$form, \Drupal\Core\Form\FormStateI
 /**
  * Submit callback for node edit form.
  */
-function islandoraEntityStatusNodeEditSubmit(array &$form, \Drupal\Core\Form\FormStateInterface $form_state) {
+function islandoraEntityStatusNodeEditSubmit(array &$form, FormStateInterface $form_state) {
   $node = $form_state->getFormObject()->getEntity();
   $data = $form_state->cleanValues()->getValues();
 
-  // Store data in temporary storage
+  // Store data in temporary storage.
   $tempstore = \Drupal::service('tempstore.private')->get('islandora_entity_status');
   $tempstore->set('node_edit_data', ['node_id' => $node->id(), 'data' => $data]);
 
-  // Redirect to the confirmation page
+  // Redirect to the confirmation page.
   $form_state->setRedirect('islandora_entity_status.node_edit_confirm');
 }
 
@@ -85,18 +88,17 @@ function islandoraEntityStatusNodeEditSubmit(array &$form, \Drupal\Core\Form\For
 function findCollectionNodes($currentNodeId) {
   $relatedNodeIds = [];
 
-  // Initial query to find nodes where the field_member_of contains the current node ID.
+  // Initial query to find nodes where the field_member_of contains
+  // the current node ID.
   $query = \Drupal::entityQuery('node')
-    ->condition('type', 'islandora_object') // Replace with your content type machine name
+    ->condition('type', 'islandora_object')
     ->condition('field_member_of', $currentNodeId, '=')
     ->accessCheck(FALSE);
 
   $result = $query->execute();
 
-  // Load the initial set of nodes.
   $relatedNodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($result);
 
-  // Check if any related nodes are found.
   if (!empty($relatedNodes)) {
     foreach ($relatedNodes as $relatedNode) {
       $relatedNodeIds[] = $relatedNode->id();
@@ -188,7 +190,8 @@ function islandora_entity_status_batch_finished($success, $results, $operations)
       }
       $messenger->addMessage(new Markup($message, 'html'));
     }
-  } else {
+  }
+  else {
     // Batch processing failed.
     $messenger->addError(t('Batch processing failed.'));
   }
