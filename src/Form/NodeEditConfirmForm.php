@@ -7,6 +7,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\Core\Url;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\node\NodeInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -58,16 +59,16 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t('Are you sure you want to edit this node? ' .
-      'The status of its associated collection items will be ' .
-      'changed to the same.<br><br>');
+    return $this->t("Are you sure you want to edit this node? 
+  The status of its associated collection items will be 
+  changed to the same.<br><br>");
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCancelUrl() {
-    // Retrieve data from temporary storage
+    // Retrieve data from temporary storage.
     $data = $this->tempStoreData;
     $currentNodeId = $data['node_id'];
     return Url::fromRoute('entity.node.edit_form', ['node' => $currentNodeId]);
@@ -82,7 +83,10 @@ class NodeEditConfirmForm extends ConfirmFormBase {
     $nodeEditData = $this->tempStoreData;;
 
     if (!$nodeEditData['node_id']) {
-      $form_state->setRedirect('entity.node.edit_form', ['node' => $nodeEditData['node_id']]);
+      $form_state->setRedirect(
+        'entity.node.edit_form',
+        ['node' => $nodeEditData['node_id']]
+      );
     }
 
     $form['#title'] = 'Confirm Edit';
@@ -104,9 +108,9 @@ class NodeEditConfirmForm extends ConfirmFormBase {
 
     if (!empty($data) && is_array($data)) {
       // Load the node.
-      $node = \Drupal\node\Entity\Node::load($data['node_id']);
+      $node = $this->entityTypeManager->getStorage('node')->load($data['node_id']);
 
-      if ($node instanceof \Drupal\node\NodeInterface) {
+      if ($node instanceof NodeInterface) {
 
         // Update the node fields with the latest data.
         foreach ($data['data'] as $field_name => $field_value) {

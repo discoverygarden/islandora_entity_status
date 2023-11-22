@@ -7,7 +7,6 @@
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\TempStore\PrivateTempStoreFactory;
 use Drupal\islandora\IslandoraUtils;
 use Drupal\media\Entity\Media;
 use Drupal\media\MediaInterface;
@@ -63,14 +62,14 @@ function islandora_entity_status_form_alter(&$form, FormStateInterface $form_sta
   if ($form_id == 'node_islandora_object_edit_form') {
     // We need to remove all submit method, inorder to make sure
     // we redirect user to confirmation page.
-    $form['actions']['submit']['#submit'] = ['islandoraEntityStatusNodeEditSubmit'];
+    $form['actions']['submit']['#submit'] = ['islandora_entity_status_node_edit_submit'];
   }
 }
 
 /**
  * Submit callback for node edit form.
  */
-function islandoraEntityStatusNodeEditSubmit(array &$form, FormStateInterface $form_state) {
+function islandora_entity_status_node_edit_submit(array &$form, FormStateInterface $form_state) {
   $node = $form_state->getFormObject()->getEntity();
   $data = $form_state->cleanValues()->getValues();
 
@@ -85,7 +84,7 @@ function islandoraEntityStatusNodeEditSubmit(array &$form, FormStateInterface $f
 /**
  * Find related nodes.
  */
-function findCollectionNodes($currentNodeId) {
+function find_collection_nodes($currentNodeId) {
   $relatedNodeIds = [];
 
   // Initial query to find nodes where the field_member_of contains
@@ -115,7 +114,7 @@ function islandora_entity_status_node_insert($node) {
   // Check if the node type is the Repository Item content type.
   if ($node->getType() == 'islandora_object') {
     // Trigger the batch process.
-    $node_ids_to_update = findCollectionNodes($node->id());
+    $node_ids_to_update = find_collection_nodes($node->id());
     $node_status = $node->get('status');
     islandora_entity_status_trigger_batch_process($node_ids_to_update, $node_status);
   }
@@ -128,7 +127,7 @@ function islandora_entity_status_node_update($node) {
   // Check if the node type is the Repository Item content type.
   if ($node->getType() == 'islandora_object') {
     // Trigger the batch process.
-    $node_ids_to_update = findCollectionNodes($node->id());
+    $node_ids_to_update = find_collection_nodes($node->id());
     $latestStatus = $node->get('status')->value;
 
     islandora_entity_status_trigger_batch_process($node_ids_to_update, $latestStatus);
@@ -140,16 +139,16 @@ function islandora_entity_status_node_update($node) {
  */
 function islandora_entity_status_trigger_batch_process($node_ids, $node_status) {
   // Create a batch operation.
-  $operations = array(
-    array('islandora_entity_status_batch_operation', [$node_ids, $node_status]),
-  );
+  $operations = [
+    ['islandora_entity_status_batch_operation', [$node_ids, $node_status]],
+  ];
 
   // Create a batch.
-  $batch = array(
+  $batch = [
     'title' => t('Processing nodes'),
     'operations' => $operations,
     'finished' => 'islandora_entity_status_batch_finished',
-  );
+  ];
 
   // Add the batch to the queue.
   batch_set($batch);
