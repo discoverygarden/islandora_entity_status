@@ -5,9 +5,11 @@
  * Hook implementations.
  */
 
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\islandora\IslandoraUtils;
 use Drupal\media\MediaInterface;
 use Drupal\node\NodeInterface;
+use Drupal\media\Entity\Media;
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
@@ -21,6 +23,30 @@ function islandora_entity_status_media_presave(MediaInterface $media) {
         $node_status = intval($node->status->value);
         $media->set('status', $node_status);
       }
+    }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_update().
+ */
+function islandora_entity_status_node_update(EntityInterface $entity) {
+  // Check if the entity is a node with the bundle "islandora_object".
+  if ($entity->hasField(IslandoraUtils::MEMBER_OF_FIELD)) {
+    // Get the current node ID.
+    $nid = $entity->id();
+
+    // Query for media items that are associated with the current node.
+    $query = \Drupal::entityQuery('media')
+      ->accessCheck(FALSE)
+      ->condition(IslandoraUtils::MEDIA_OF_FIELD, $nid);
+    $media_ids = $query->execute();
+
+    // Load the media items and set their status to the same status as the node.
+    $media_items = Media::loadMultiple($media_ids);
+    foreach ($media_items as $media_item) {
+      $media_item->set('status', $entity->get('status')->value);
+      $media_item->save();
     }
   }
 }
