@@ -3,6 +3,9 @@
 namespace Drupal\islandora_entity_status\Commands;
 
 use Drush\Commands\DrushCommands;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 
 /**
  * Drush command implementation.
