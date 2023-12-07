@@ -59,9 +59,9 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t("Are you sure you want to edit this node? 
-  The status of its associated collection items will be 
-  changed to the same.<br><br>");
+    return $this->t("Please confirm if you wish to modify this item.
+     All items in this collection will automatically
+     update to match this item's status.<br><br>");
   }
 
   /**
