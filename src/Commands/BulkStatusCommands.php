@@ -4,7 +4,7 @@ namespace Drupal\islandora_entity_status\Commands;
 
 use Drush\Commands\DrushCommands;
 
-class CustomDrushCommands extends DrushCommands {
+class BulkStatusCommands extends DrushCommands {
 
   /**
    * Find and update related nodes.

@@ -1,5 +1,5 @@
 services:
   islandora_entity_status.find_update_related_nodes:
-    class: \Drupal\islandora_entity_status\Commands\CustomDrushCommands
+    class: \Drupal\islandora_entity_status\Commands\BulkStatusCommands
     tags:
       - name: drush.command
