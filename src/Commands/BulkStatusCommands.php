@@ -2,15 +2,20 @@
 
 namespace Drupal\islandora_entity_status\Commands;
 
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
  * Drush command implementation.
  */
-class BulkStatusCommands extends DrushCommands implements ContainerInjectionInterface {
+class BulkStatusCommands extends DrushCommands {
+
+  use DependencySerializationTrait;
+  use StringTranslationTrait;
 
   /**
    * The entity type manager service.
@@ -27,15 +32,6 @@ class BulkStatusCommands extends DrushCommands implements ContainerInjectionInte
     ) {
     parent::__construct();
     $this->entityTypeManager = $entity_type_manager;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public static function create(ContainerInterface $container) {
-    return new static(
-      $container->get('entity_type.manager'),
-    );
   }
 
   /**
@@ -72,7 +68,7 @@ class BulkStatusCommands extends DrushCommands implements ContainerInjectionInte
    */
   private function updateRelatedNodes($currentNodeId, $status) {
     // Use the provided function to find related nodes.
-    $relatedNodeIds = findCollectionNodes($currentNodeId);
+    $relatedNodeIds = find_collection_nodes($currentNodeId);
 
     // Include the provided node ID in the list of nodes to update.
     $relatedNodeIds[] = $currentNodeId;
