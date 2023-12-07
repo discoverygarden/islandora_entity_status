@@ -4,9 +4,7 @@ namespace Drupal\islandora_entity_status\Commands;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drush\Commands\DrushCommands;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
-use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
 /**
