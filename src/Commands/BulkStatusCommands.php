@@ -4,7 +4,36 @@ namespace Drupal\islandora_entity_status\Commands;
 
 use Drush\Commands\DrushCommands;
 
-class BulkStatusCommands extends DrushCommands {
+/**
+ * Drush command implementation.
+ */
+class BulkStatusCommands extends DrushCommands implements ContainerInjectionInterface {
+
+  /**
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Constructor.
+   */
+  public function __construct(
+        EntityTypeManagerInterface $entity_type_manager,
+    ) {
+    parent::__construct();
+    $this->entityTypeManager = $entity_type_manager;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('entity_type.manager'),
+    );
+  }
 
   /**
    * Find and update related nodes.
@@ -47,7 +76,7 @@ class BulkStatusCommands extends DrushCommands {
 
     // Update the status for each related node.
     foreach ($relatedNodeIds as $relatedNodeId) {
-      $node = \Drupal::entityTypeManager()->getStorage('node')->load($relatedNodeId);
+      $node = $this->entityTypeManager->getStorage('node')->load($relatedNodeId);
 
       if ($node) {
         $node->set('status', $status);
