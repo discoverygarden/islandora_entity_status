@@ -2,9 +2,35 @@
 
 namespace Drupal\islandora_entity_status\Commands;
 
+use Drupal\Core\DependencyInjection\DependencySerializationTrait;
 use Drush\Commands\DrushCommands;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\StringTranslation\StringTranslationTrait;
 
+/**
+ * Drush command implementation.
+ */
 class BulkStatusCommands extends DrushCommands {
+
+  use DependencySerializationTrait;
+  use StringTranslationTrait;
+
+  /**
+   * The entity type manager service.
+   *
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected EntityTypeManagerInterface $entityTypeManager;
+
+  /**
+   * Constructor.
+   */
+  public function __construct(
+        EntityTypeManagerInterface $entity_type_manager,
+    ) {
+    parent::__construct();
+    $this->entityTypeManager = $entity_type_manager;
+  }
 
   /**
    * Find and update related nodes.
@@ -40,14 +66,14 @@ class BulkStatusCommands extends DrushCommands {
    */
   private function updateRelatedNodes($currentNodeId, $status) {
     // Use the provided function to find related nodes.
-    $relatedNodeIds = findCollectionNodes($currentNodeId);
+    $relatedNodeIds = find_collection_nodes($currentNodeId);
 
     // Include the provided node ID in the list of nodes to update.
     $relatedNodeIds[] = $currentNodeId;
 
     // Update the status for each related node.
     foreach ($relatedNodeIds as $relatedNodeId) {
-      $node = \Drupal::entityTypeManager()->getStorage('node')->load($relatedNodeId);
+      $node = $this->entityTypeManager->getStorage('node')->load($relatedNodeId);
 
       if ($node) {
         $node->set('status', $status);
