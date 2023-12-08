@@ -13,7 +13,6 @@ use Drupal\media\MediaInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Twig\Markup;
-use \Drupal\Core\Routing\TrustedRedirectResponse;
 
 /**
  * Implements hook_ENTITY_TYPE_presave().

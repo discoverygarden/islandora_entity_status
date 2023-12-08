@@ -68,7 +68,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    */
   public function getCancelUrl() {
     // Retrieve data from temporary storage.
-    $data = $this->tempStore->get('node_edit_data');;
+    $data = $this->tempStore->get('node_edit_data');
     $currentNodeId = $data['node_id'];
     return Url::fromRoute('entity.node.edit_form', ['node' => $currentNodeId]);
   }
@@ -80,7 +80,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
     $form = parent::buildForm($form, $form_state);
 
     // Retrieve data from temporary storage.
-    $nodeEditData = $this->tempStore->get('node_edit_data');;
+    $nodeEditData = $this->tempStore->get('node_edit_data');
 
     if (!$nodeEditData['node_id']) {
       $form_state->setRedirect(
@@ -103,7 +103,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
     // Trigger node save with data from session.
-    $data = $this->tempStore->get('node_edit_data');;
+    $data = $this->tempStore->get('node_edit_data');
 
     if (!empty($data) && is_array($data)) {
       // Load the node.

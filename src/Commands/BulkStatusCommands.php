@@ -48,7 +48,7 @@ class BulkStatusCommands extends DrushCommands {
 
     // Loop through each provided node ID.
     foreach ($nodeIds as $nodeId) {
-      $this->logger()->success(t('Node %node processed and status set to %status.',
+      $this->logger()->success($this->t('Node %node processed and status set to %status.',
         ['%node' => $nodeId, '%status' => $status]));
       $this->updateRelatedNodes($nodeId, $status);
     }
