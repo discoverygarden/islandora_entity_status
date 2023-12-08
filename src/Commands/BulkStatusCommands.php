@@ -25,9 +25,7 @@ class BulkStatusCommands extends DrushCommands {
   /**
    * Constructor.
    */
-  public function __construct(
-        EntityTypeManagerInterface $entity_type_manager,
-    ) {
+  public function __construct(EntityTypeManagerInterface $entity_type_manager) {
     parent::__construct();
     $this->entityTypeManager = $entity_type_manager;
   }
@@ -50,6 +48,8 @@ class BulkStatusCommands extends DrushCommands {
 
     // Loop through each provided node ID.
     foreach ($nodeIds as $nodeId) {
+      $this->logger()->success(t('Node %node processed and status set to %status.',
+        ['%node' => $nodeId, '%status' => $status]));
       $this->updateRelatedNodes($nodeId, $status);
     }
 

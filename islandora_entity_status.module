@@ -13,6 +13,7 @@ use Drupal\media\MediaInterface;
 use Drupal\node\Entity\Node;
 use Drupal\node\NodeInterface;
 use Twig\Markup;
+use \Drupal\Core\Routing\TrustedRedirectResponse;
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
@@ -68,6 +69,7 @@ function islandora_entity_status_form_alter(&$form, FormStateInterface $form_sta
   if ($form_id == 'node_islandora_object_edit_form') {
     // We need to remove all submit method, inorder to make sure
     // we redirect user to confirmation page.
+    // Add a custom submit handler.
     $form['actions']['submit']['#submit'] = ['islandora_entity_status_node_edit_submit'];
   }
 }
@@ -83,8 +85,17 @@ function islandora_entity_status_node_edit_submit(array &$form, FormStateInterfa
   $tempstore = \Drupal::service('tempstore.private')->get('islandora_entity_status');
   $tempstore->set('node_edit_data', ['node_id' => $node->id(), 'data' => $data]);
 
+  // Drupal `destination` parameter override the redirect.
+  // Need to unset from query param and pass it to our redirect url.
+  $options = [];
+  $query = \Drupal::request()->query;
+  if ($query->has('destination')) {
+    $options['query']['destination'] = $query->get('destination');
+    $query->remove('destination');
+  }
+
   // Redirect to the confirmation page.
-  $form_state->setRedirect('islandora_entity_status.node_edit_confirm');
+  $form_state->setRedirect('islandora_entity_status.node_edit_confirm', [], $options);
 }
 
 /**

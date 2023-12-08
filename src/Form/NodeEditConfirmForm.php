@@ -16,11 +16,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class NodeEditConfirmForm extends ConfirmFormBase {
 
   /**
-   * Temporary storage for the 'node_edit_data'.
-   */
-  protected $tempStoreData;
-
-  /**
    * Temporary storage for the 'node_edit_confirm'.
    *
    * @var \Drupal\Core\TempStore\PrivateTempStore
@@ -40,7 +35,6 @@ class NodeEditConfirmForm extends ConfirmFormBase {
   public function __construct(PrivateTempStoreFactory $private_temp_store, EntityTypeManagerInterface $entity_type_manager) {
     $this->tempStore = $private_temp_store->get('islandora_entity_status');
     $this->entityTypeManager = $entity_type_manager;
-    $this->tempStoreData = $this->tempStore->get('node_edit_data');
   }
 
   /**
@@ -74,7 +68,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    */
   public function getCancelUrl() {
     // Retrieve data from temporary storage.
-    $data = $this->tempStoreData;
+    $data = $this->tempStore->get('node_edit_data');;
     $currentNodeId = $data['node_id'];
     return Url::fromRoute('entity.node.edit_form', ['node' => $currentNodeId]);
   }
@@ -86,7 +80,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
     $form = parent::buildForm($form, $form_state);
 
     // Retrieve data from temporary storage.
-    $nodeEditData = $this->tempStoreData;
+    $nodeEditData = $this->tempStore->get('node_edit_data');;
 
     if (!$nodeEditData['node_id']) {
       $form_state->setRedirect(
@@ -108,17 +102,14 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-
-    // Perform any necessary logic before redirecting.
     // Trigger node save with data from session.
-    $data = $this->tempStoreData;
+    $data = $this->tempStore->get('node_edit_data');;
 
     if (!empty($data) && is_array($data)) {
       // Load the node.
       $node = $this->entityTypeManager->getStorage('node')->load($data['node_id']);
 
       if ($node instanceof NodeInterface) {
-
         // Update the node fields with the latest data.
         foreach ($data['data'] as $field_name => $field_value) {
           // Need to skip node created data, not required for update.
@@ -128,10 +119,14 @@ class NodeEditConfirmForm extends ConfirmFormBase {
           }
         }
 
-        // Save the updated node.
+        // Save the updated data.
         $node->save();
       }
     }
+
+    // Add a message indicating that the repository item has been updated.
+    $message = $this->t('Repository Item @title has been updated.', ['@title' => $node->label()]);
+    $this->messenger()->addMessage($message);
 
     // Delete the data stored.
     $this->tempStore->delete('node_edit_data');
