@@ -16,6 +16,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class NodeEditConfirmForm extends ConfirmFormBase {
 
   /**
+   * Temporary storage for the 'node_edit_data'.
+   */
+  protected $tempStoreData;
+
+  /**
    * Temporary storage for the 'node_edit_confirm'.
    *
    * @var \Drupal\Core\TempStore\PrivateTempStore
@@ -59,7 +64,7 @@ class NodeEditConfirmForm extends ConfirmFormBase {
    * {@inheritdoc}
    */
   public function getQuestion() {
-    return $this->t("Please confirm if you wish to modify this item.
+    return $this->t("&nbsp;Please confirm if you wish to modify this item.
      All items in this collection will automatically
      update to match this item's status.<br><br>");
   }
