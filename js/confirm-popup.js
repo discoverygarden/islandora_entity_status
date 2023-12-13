@@ -37,7 +37,7 @@
                     $('#edit-submit--2--gin-edit-form').click();
                   }
                   isClosingDialog = false;
-                }, 300); // Adjust the delay as needed.
+                }, 30);
               }
             }
           }
