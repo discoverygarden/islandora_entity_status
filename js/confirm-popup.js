@@ -43,7 +43,7 @@
           }
         });
 
-// Attach the confirmation dialog to the node edit form submit button
+      // Attach the confirmation dialog to the node edit form submit button
       const elements = once('confirmPopup', '#node-islandora-object-edit-form [type=submit]', context);
       elements.forEach(function (element) {
         // Check if the form should be submitted.
