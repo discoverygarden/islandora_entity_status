@@ -67,7 +67,7 @@ function islandora_entity_status_form_node_islandora_object_edit_form_alter(&$fo
   // On `Repository Item` we need to show confirmation popup to editor.
   // We tried with redirecting to a confirmation page, but it involves too
   // much data handling.
-  $message = "<p>Status updates to this node will also apply to its child nodes    , if any are present.</p>";
+  $message = "<p>Status updates to this node will also apply to its child nodes, if any are present.</p>";
 
   // Attach the custom library.
   $form['#attached']['library'][] = 'islandora_entity_status/confirm-popup';
