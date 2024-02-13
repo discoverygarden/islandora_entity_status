@@ -2,7 +2,6 @@
 
 namespace Drupal\islandora_entity_status\EventSubscriber;
 
-use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\islandora_events\Event\IslandoraMediaEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Session\AccountProxyInterface;
@@ -20,23 +19,13 @@ class IslandoraMediaEntitySubscriber implements EventSubscriberInterface {
   protected $currentUser;
 
   /**
-   * The logger factory.
-   *
-   * @var \Drupal\Core\Logger\LoggerChannelFactoryInterface
-   */
-  protected $loggerFactory;
-
-  /**
    * Constructs a new IslandoraMediaSubscriber object.
    *
    * @param \Drupal\Core\Session\AccountProxyInterface $current_user
    *   The current user.
-   * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $logger_factory
-   *   The logger factory.
    */
-  public function __construct(AccountProxyInterface $current_user, LoggerChannelFactoryInterface $logger_factory) {
+  public function __construct(AccountProxyInterface $current_user) {
     $this->currentUser = $current_user;
-    $this->loggerFactory = $logger_factory;
   }
 
   /**
@@ -56,11 +45,11 @@ class IslandoraMediaEntitySubscriber implements EventSubscriberInterface {
    */
   public function onIslandoraMediaPresave(IslandoraMediaEvent $event) {
     $media = $event->getMedia();
-    $referenced_node = $event->getReferencedNode();
+    $media_of_node = $event->getReferencedNode();
 
     // Set media status same as media_of node status.
-    $referenced_node_status = intval($referenced_node->status->value);
-    $media->set('status', $referenced_node_status);
+    $media_of_node_status = intval($media_of_node->status->value);
+    $media->set('status', $media_of_node_status);
   }
 
 }

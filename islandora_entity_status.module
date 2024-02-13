@@ -18,22 +18,7 @@ use Twig\Markup;
 function islandora_entity_status_node_update(EntityInterface $entity) {
   // Check if the entity is a node with the bundle "islandora_object".
   if ($entity->hasField(IslandoraUtils::MEMBER_OF_FIELD)) {
-    // Get the current node ID.
     $nid = $entity->id();
-
-    // Query for media items that are associated with the current node.
-    $query = \Drupal::entityQuery('media')
-      ->accessCheck(FALSE)
-      ->condition(IslandoraUtils::MEDIA_OF_FIELD, $nid);
-    $media_ids = $query->execute();
-
-    // Load the media items and set their status to the same status as the node.
-    $media_items = Media::loadMultiple($media_ids);
-    foreach ($media_items as $media_item) {
-      $media_item->set('status', $entity->get('status')->value);
-      $media_item->save();
-    }
-
     // Trigger the batch process for collection node.
     $node_ids_to_update = find_collection_nodes($nid);
     $latestStatus = $entity->get('status')->value;

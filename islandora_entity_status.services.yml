@@ -6,8 +6,14 @@ services:
     tags:
       - { name: drush.command }
 
+  islandora_entity_status.islandora_node_entity_subscriber:
+    class: Drupal\islandora_entity_status\EventSubscriber\IslandoraNodeEntitySubscriber
+    arguments: ['@current_user', '@entity_type.manager']
+    tags:
+      - { name: event_subscriber }
+
   islandora_entity_status.islandora_media_entity_subscriber:
     class: Drupal\islandora_entity_status\EventSubscriber\IslandoraMediaEntitySubscriber
-    arguments: ['@current_user', '@logger.factory']
+    arguments: ['@current_user']
     tags:
       - { name: event_subscriber }
