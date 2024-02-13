@@ -1,0 +1,7 @@
+services:
+  islandora_entity_status.find_update_related_nodes:
+    class: \Drupal\islandora_entity_status\Commands\BulkStatusCommands
+    arguments:
+      - '@entity_type.manager'
+    tags:
+      - { name: drush.command }

@@ -1,0 +1,8 @@
+confirm-popup:
+  version: 1.x
+  js:
+    js/confirm-popup.js: {}
+  dependencies:
+    - core/jquery
+    - core/jquery.ui.dialog
+    - core/once

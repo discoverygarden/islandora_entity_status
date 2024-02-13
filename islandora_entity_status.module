@@ -6,10 +6,13 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\islandora\IslandoraUtils;
-use Drupal\media\MediaInterface;
-use Drupal\node\NodeInterface;
 use Drupal\media\Entity\Media;
+use Drupal\media\MediaInterface;
+use Drupal\node\Entity\Node;
+use Drupal\node\NodeInterface;
+use Twig\Markup;
 
 /**
  * Implements hook_ENTITY_TYPE_presave().
@@ -48,5 +51,114 @@ function islandora_entity_status_node_update(EntityInterface $entity) {
       $media_item->set('status', $entity->get('status')->value);
       $media_item->save();
     }
+
+    // Trigger the batch process for collection node.
+    $node_ids_to_update = find_collection_nodes($nid);
+    $latestStatus = $entity->get('status')->value;
+
+    islandora_entity_status_trigger_batch_process($node_ids_to_update, $latestStatus);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function islandora_entity_status_form_node_islandora_object_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // On `Repository Item` we need to show confirmation popup to editor.
+  // We tried with redirecting to a confirmation page, but it involves too
+  // much data handling.
+  $message = "<p>Status updates to this node will also apply to its child nodes, if any are present.</p>";
+
+  // Attach the custom library.
+  $form['#attached']['library'][] = 'islandora_entity_status/confirm-popup';
+  // Pass the confirmation message to JavaScript.
+  $form['#attached']['drupalSettings']['custom_confirm_popup']['message'] = $message;
+}
+
+/**
+ * Find related nodes.
+ */
+function find_collection_nodes($currentNodeId) {
+  $relatedNodeIds = [];
+
+  // Initial query to find nodes where the field_member_of contains
+  // the current node ID.
+  $query = \Drupal::entityQuery('node')
+    ->condition('type', 'islandora_object')
+    ->condition('field_member_of', $currentNodeId, '=')
+    ->accessCheck(FALSE);
+
+  $result = $query->execute();
+
+  $relatedNodes = \Drupal::entityTypeManager()->getStorage('node')->loadMultiple($result);
+
+  if (!empty($relatedNodes)) {
+    foreach ($relatedNodes as $relatedNode) {
+      $relatedNodeIds[] = $relatedNode->id();
+    }
+  }
+
+  return $relatedNodeIds;
+}
+
+/**
+ * Helper function to trigger the batch process.
+ */
+function islandora_entity_status_trigger_batch_process($node_ids, $node_status) {
+  // Create a batch operation.
+  $operations = [
+    ['islandora_entity_status_batch_operation', [$node_ids, $node_status]],
+  ];
+
+  // Create a batch.
+  $batch = [
+    'title' => t('Processing nodes'),
+    'operations' => $operations,
+    'finished' => 'islandora_entity_status_batch_finished',
+  ];
+
+  // Add the batch to the queue.
+  batch_set($batch);
+}
+
+/**
+ * Batch operation callback.
+ */
+function islandora_entity_status_batch_operation($node_ids, $node_status, &$context) {
+  // Perform your batch processing here.
+  // Update the status for each related node.
+  foreach ($node_ids as $relatedNodeId) {
+    $relatedNode = Node::load($relatedNodeId);
+    $relatedNode->set('status', $node_status);
+    $relatedNode->save();
+
+    // Update the progress.
+    $context['results'][] = t('Node %node processed and status set to %status.',
+      ['%node' => $relatedNodeId, '%status' => $node_status]);
+  }
+}
+
+/**
+ * Batch finished callback.
+ */
+function islandora_entity_status_batch_finished($success, $results, $operations) {
+  $messenger = \Drupal::messenger();
+  $message = '';
+
+  if ($success) {
+    if (!empty($results)) {
+      // Batch processing completed successfully.
+      // Display a message indicating success.
+      $messenger->addMessage(t('Batch processing completed successfully.'));
+
+      foreach ($results as $result) {
+        $message .= '<br>' . $result;
+      }
+      $messenger->addMessage(new Markup($message, 'html'));
+    }
+  }
+  else {
+    // Batch processing failed.
+    $messenger->addError(t('Batch processing failed.'));
   }
 }
