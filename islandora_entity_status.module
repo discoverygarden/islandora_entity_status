@@ -9,26 +9,8 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\islandora\IslandoraUtils;
 use Drupal\media\Entity\Media;
-use Drupal\media\MediaInterface;
 use Drupal\node\Entity\Node;
-use Drupal\node\NodeInterface;
 use Twig\Markup;
-
-/**
- * Implements hook_ENTITY_TYPE_presave().
- */
-function islandora_entity_status_media_presave(MediaInterface $media) {
-  if ($media->hasField(IslandoraUtils::MEDIA_OF_FIELD)) {
-    $media_of = $media->get(IslandoraUtils::MEDIA_OF_FIELD);
-    if (!$media_of->isEmpty()) {
-      $node = $media_of->referencedEntities()[0];
-      if ($node instanceof NodeInterface) {
-        $node_status = intval($node->status->value);
-        $media->set('status', $node_status);
-      }
-    }
-  }
-}
 
 /**
  * Implements hook_ENTITY_TYPE_update().

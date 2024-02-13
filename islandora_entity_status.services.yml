@@ -5,3 +5,9 @@ services:
       - '@entity_type.manager'
     tags:
       - { name: drush.command }
+
+  islandora_entity_status.islandora_media_entity_subscriber:
+    class: Drupal\islandora_entity_status\EventSubscriber\IslandoraMediaEntitySubscriber
+    arguments: ['@current_user', '@logger.factory']
+    tags:
+      - { name: event_subscriber }
