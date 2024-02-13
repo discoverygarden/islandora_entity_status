@@ -8,7 +8,6 @@
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\islandora\IslandoraUtils;
-use Drupal\media\Entity\Media;
 use Drupal\node\Entity\Node;
 use Twig\Markup;
 

@@ -4,7 +4,6 @@ namespace Drupal\islandora_entity_status\EventSubscriber;
 
 use Drupal\islandora\IslandoraUtils;
 use Drupal\islandora_events\Event\IslandoraNodeEvent;
-use Drupal\media\Entity\Media;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
