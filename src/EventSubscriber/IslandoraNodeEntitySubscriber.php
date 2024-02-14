@@ -138,15 +138,15 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
     $operations = [];
     foreach ($node_ids as $node_id) {
       $operations[] = [
-        [$this, 'islandora_entity_status_batch_operation'],
-        [$node_id, $node_status]
+        [$this, 'islandoraEntityStatusBatchOperation'],
+        [$node_id, $node_status],
       ];
     }
 
     $batch = [
-      'title' => t('Processing nodes'),
+      'title' => $this->t('Processing nodes'),
       'operations' => $operations,
-      'finished' => [$this, 'islandora_entity_status_batch_finished'],
+      'finished' => [$this, 'islandoraEntityStatusBatchFinished'],
       'batch_size' => $batch_size,
     ];
     batch_set($batch);
@@ -155,7 +155,7 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
   /**
    * Batch operation callback.
    */
-  public function islandora_entity_status_batch_operation($node_id, $node_status, &$context) {
+  public function islandoraEntityStatusBatchOperation($node_id, $node_status, &$context) {
     // Perform your batch processing here.
     // Load the node using the entity type manager.
     $node = $this->entityTypeManager->getStorage('node')->load($node_id);
@@ -179,7 +179,7 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
   /**
    * Batch finished callback.
    */
-  public function islandora_entity_status_batch_finished($success, $results, $operations) {
+  public function islandoraEntityStatusBatchFinished($success, $results, $operations) {
     $messenger = $this->messenger;
 
     if ($success) {
@@ -191,12 +191,14 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
           $processed_nodes_message .= $result . '<br>';
         }
         $messenger->addMessage(new Markup($processed_nodes_message, 'html'));
-      } else {
-        $messenger->addMessage(t('No nodes were processed.'));
       }
-    } else {
+      else {
+        $messenger->addMessage($this->t('No nodes were processed.'));
+      }
+    }
+    else {
       // Batch processing failed.
-      $messenger->addError(t('Batch processing failed.'));
+      $messenger->addError($this->t('Batch processing failed.'));
     }
   }
 
