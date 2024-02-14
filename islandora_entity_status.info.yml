@@ -7,3 +7,4 @@ dependencies:
   - drupal:node
   - drupal:file
   - islandora:islandora
+  - islandora_events:islandora_events
