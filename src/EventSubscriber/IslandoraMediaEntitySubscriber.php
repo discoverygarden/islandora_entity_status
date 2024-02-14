@@ -4,29 +4,11 @@ namespace Drupal\islandora_entity_status\EventSubscriber;
 
 use Drupal\islandora_events\Event\IslandoraMediaEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Drupal\Core\Session\AccountProxyInterface;
 
 /**
  * Defines an event subscriber for Islandora Media.
  */
 class IslandoraMediaEntitySubscriber implements EventSubscriberInterface {
-
-  /**
-   * The current user.
-   *
-   * @var \Drupal\Core\Session\AccountProxyInterface
-   */
-  protected $currentUser;
-
-  /**
-   * Constructs a new IslandoraMediaSubscriber object.
-   *
-   * @param \Drupal\Core\Session\AccountProxyInterface $current_user
-   *   The current user.
-   */
-  public function __construct(AccountProxyInterface $current_user) {
-    $this->currentUser = $current_user;
-  }
 
   /**
    * {@inheritdoc}
