@@ -6,18 +6,29 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\taxonomy\Entity\Term;
 
 /**
  * Implements hook_form_FORM_ID_alter().
  */
 function islandora_entity_status_form_node_islandora_object_edit_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  // Get the current node object.
+  $node = $form_state->getFormObject()->getEntity();
+
+  // Get the field_model value.
+  $field_value = $node->get('field_model')->getValue();
+  $term = Term::load($field_value[0]['target_id']);
+
   // On `Repository Item` we need to show confirmation popup to editor.
   // We tried with redirecting to a confirmation page, but it involves too
   // much data handling.
-  $message = "<p>Status updates to this node will also apply to its child nodes, if any are present.</p>";
+  // Show popup only on collection node.
+  if ($term && $term->getName() == 'Collection') {
+    $message = "<p>Status updates to this node will also apply to its child nodes, if any are present.</p>";
 
-  // Attach the custom library.
-  $form['#attached']['library'][] = 'islandora_entity_status/confirm-popup';
-  // Pass the confirmation message to JavaScript.
-  $form['#attached']['drupalSettings']['custom_confirm_popup']['message'] = $message;
+    // Attach the custom library.
+    $form['#attached']['library'][] = 'islandora_entity_status/confirm-popup';
+    // Pass the confirmation message to JavaScript.
+    $form['#attached']['drupalSettings']['custom_confirm_popup']['message'] = $message;
+  }
 }
