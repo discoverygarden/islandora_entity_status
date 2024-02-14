@@ -6,17 +6,18 @@ use Drupal\Core\Render\Markup;
 use Drupal\islandora\IslandoraUtils;
 use Drupal\islandora_events\Event\IslandoraCollectionStatusUpdate;
 use Drupal\islandora_events\Event\IslandoraNodeEvent;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Messenger\MessengerInterface;
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
-
+use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Defines an event subscriber for Islandora Media.
  */
 class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
   use DependencySerializationTrait;
+  use StringTranslationTrait;
 
   /**
    * The entity type manager.
@@ -74,7 +75,8 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
       $query->condition(IslandoraUtils::MEDIA_OF_FIELD, $nid);
       $media_ids = $query->execute();
 
-      // Load the media items and set their status to the same status as the node.
+      // Load the media items and set their status to the same status
+      // as the node.
       $media_items = $this->entityTypeManager->getStorage('media')
         ->loadMultiple($media_ids);
       foreach ($media_items as $media_item) {
@@ -135,14 +137,17 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
   protected function triggerBatchProcess($node_ids, $node_status, $batch_size = 10) {
     $operations = [];
     foreach ($node_ids as $node_id) {
-      $operations[] = [[$this, 'islandora_entity_status_batch_operation'], [$node_id, $node_status]];
+      $operations[] = [
+        [$this, 'islandora_entity_status_batch_operation'],
+        [$node_id, $node_status]
+      ];
     }
 
     $batch = [
       'title' => t('Processing nodes'),
       'operations' => $operations,
       'finished' => [$this, 'islandora_entity_status_batch_finished'],
-      'batch_size' => $batch_size, // Set the batch size here.
+      'batch_size' => $batch_size,
     ];
     batch_set($batch);
   }
@@ -160,13 +165,14 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
       $node->save();
 
       // Update the progress.
-      $context['results'][] = t('Node %node processed and status set to %status.', [
+      $context['results'][] = $this->t('Node %node processed and status set to %status.', [
         '%node' => $node_id,
         '%status' => $node_status,
       ]);
-    } else {
+    }
+    else {
       // Handle the case where the node cannot be loaded.
-      $context['results'][] = t('Failed to load node with ID %node.', ['%node' => $node_id]);
+      $context['results'][] = $this->t('Failed to load node with ID %node.', ['%node' => $node_id]);
     }
   }
 
