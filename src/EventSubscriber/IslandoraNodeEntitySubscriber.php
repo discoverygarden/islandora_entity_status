@@ -101,7 +101,6 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
 
     if (!empty($attached_nodes)) {
       $latestStatus = $event->getUpdatedNodeStatus();
-      $this->triggerBatchProcess($attached_nodes, $latestStatus);
       $this->triggerBatchProcess($attached_nodes, $latestStatus, 10);
     }
   }
