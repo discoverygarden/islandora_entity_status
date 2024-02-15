@@ -2,7 +2,7 @@
 
 namespace Drupal\islandora_entity_status\EventSubscriber;
 
-use Drupal\Core\Render\Markup;
+use Twig\Markup;
 use Drupal\islandora\IslandoraUtils;
 use Drupal\islandora_events\Event\IslandoraCollectionStatusUpdate;
 use Drupal\islandora_events\Event\IslandoraNodeEvent;
