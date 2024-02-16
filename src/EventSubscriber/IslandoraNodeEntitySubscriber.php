@@ -2,7 +2,7 @@
 
 namespace Drupal\islandora_entity_status\EventSubscriber;
 
-use Drupal\Core\Render\Markup;
+use Twig\Markup;
 use Drupal\islandora\IslandoraUtils;
 use Drupal\islandora_events\Event\IslandoraCollectionStatusUpdate;
 use Drupal\islandora_events\Event\IslandoraNodeEvent;
@@ -100,8 +100,16 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
     $attached_nodes = $this->findNodesAttachedToCollection($node->id());
 
     if (!empty($attached_nodes)) {
-      $latestStatus = $event->getUpdatedNodeStatus();
-      $this->triggerBatchProcess($attached_nodes, $latestStatus, 10);
+      // On node or workflow status update of collection node
+      // we need to update all attached object node or workflow status.
+      $oldNodeStatus = $event->getOriginalNodeStatus();
+      $updatedNodeStatus = $event->getUpdatedNodeStatus();
+      $status['node'] = ($oldNodeStatus !== $updatedNodeStatus) ? $updatedNodeStatus : '';
+
+      $oldWorkflowStatus = $event->getOriginalWorkflowStatus();
+      $updatedWorkflowStatus = $event->getUpdatedWorkflowStatus();
+      $status['workflow'] = ($oldWorkflowStatus !== $updatedWorkflowStatus) ? $updatedWorkflowStatus : '';
+      $this->triggerBatchProcess($attached_nodes, $status, 10);
     }
   }
 
@@ -133,12 +141,12 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
   /**
    * Helper function to trigger the batch process.
    */
-  protected function triggerBatchProcess($node_ids, $node_status, $batch_size = 10) {
+  protected function triggerBatchProcess($node_ids, $status, $batch_size = 10) {
     $operations = [];
     foreach ($node_ids as $node_id) {
       $operations[] = [
         [$this, 'islandoraEntityStatusBatchOperation'],
-        [$node_id, $node_status],
+        [$node_id, $status],
       ];
     }
 
@@ -154,19 +162,34 @@ class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
   /**
    * Batch operation callback.
    */
-  public function islandoraEntityStatusBatchOperation($node_id, $node_status, &$context) {
+  public function islandoraEntityStatusBatchOperation($node_id, $status, &$context) {
     // Perform your batch processing here.
     // Load the node using the entity type manager.
     $node = $this->entityTypeManager->getStorage('node')->load($node_id);
     if ($node) {
-      // Update the status of the node.
-      $node->set('status', $node_status);
+      $message = '';
+
+      if (isset($status['node'])) {
+        // Update the status of the node.
+        $node->set('status', $status['node']);
+        $message .= 'Node status = ' . $status['node'] . ', ';
+      }
+
+      if (!empty($status['workflow'])) {
+        // Set the moderation state.
+        $node->set('moderation_state', $status['workflow']);
+        $message .= 'Workflow status = ' . $status['workflow'] . ', ';
+      }
+
       $node->save();
+
+      // Remove trailing comma and space.
+      $message = rtrim($message, ', ');
 
       // Update the progress.
       $context['results'][] = $this->t('Node %node processed and status set to %status.', [
         '%node' => $node_id,
-        '%status' => $node_status,
+        '%status' => $message,
       ]);
     }
     else {

@@ -14,6 +14,9 @@
       // Flag to prevent recursion.
       var isClosingDialog = false;
 
+      // Variable to store the submit button selector.
+      var submitButton = $('.form-submit[value="Save"]');
+
       // Create a dialog box.
       var confirmDialog = $('<div></div>')
         .html(confirmationMessage)
@@ -22,7 +25,7 @@
           modal: true,
           buttons: {
             Cancel: function () {
-              $('#edit-submit--2--gin-edit-form').removeClass('submit-allowed');
+              submitButton.removeClass('submit-allowed');
               $(this).dialog('close');
             },
             Save: function () {
@@ -32,9 +35,9 @@
                 $(this).dialog('close');
                 setTimeout(function () {
                   // Check if the submit button has a specific class.
-                  if ($('#edit-submit--2--gin-edit-form').hasClass('submit-allowed')) {
+                  if (submitButton.hasClass('submit-allowed')) {
                     // Trigger the form submission directly.
-                    $('#edit-submit--2--gin-edit-form').click();
+                    submitButton.click();
                   }
                   isClosingDialog = false;
                 }, 30);
@@ -44,12 +47,12 @@
         });
 
       // Attach the confirmation dialog to the node edit form submit button
-      const elements = once('confirmPopup', '#node-islandora-object-edit-form [type=submit]', context);
+      const elements = once('confirmPopup', '#node-islandora-object-edit-form [value=Save]', context);
       elements.forEach(function (element) {
         // Check if the form should be submitted.
         element.addEventListener('click', function(e) {
           if (element.classList.contains('submit-allowed')) {
-            $('#edit-submit--2--gin-edit-form').click();
+            submitButton.click();
           } else {
             // Prevent the default form submission.
             e.preventDefault();
