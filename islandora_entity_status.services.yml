@@ -6,13 +6,13 @@ services:
     tags:
       - { name: drush.command }
 
-  islandora_entity_status.islandora_node_entity_subscriber:
-    class: Drupal\islandora_entity_status\EventSubscriber\IslandoraNodeEntitySubscriber
+  islandora_entity_status.islandora_node_event_subscriber:
+    class: Drupal\islandora_entity_status\EventSubscriber\IslandoraNodeEventSubscriber
     arguments: ['@entity_type.manager', '@messenger']
     tags:
       - { name: event_subscriber }
 
-  islandora_entity_status.islandora_media_entity_subscriber:
-    class: Drupal\islandora_entity_status\EventSubscriber\IslandoraMediaEntitySubscriber
+  islandora_entity_status.islandora_media_event_subscriber:
+    class: Drupal\islandora_entity_status\EventSubscriber\IslandoraMediaEventSubscriber
     tags:
       - { name: event_subscriber }

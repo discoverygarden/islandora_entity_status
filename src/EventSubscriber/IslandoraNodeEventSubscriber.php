@@ -15,7 +15,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * Defines an event subscriber for Islandora Media.
  */
-class IslandoraNodeEntitySubscriber implements EventSubscriberInterface {
+class IslandoraNodeEventSubscriber implements EventSubscriberInterface {
   use DependencySerializationTrait;
   use StringTranslationTrait;
 

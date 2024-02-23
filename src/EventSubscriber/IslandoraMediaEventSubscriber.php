@@ -8,7 +8,7 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 /**
  * Defines an event subscriber for Islandora Media.
  */
-class IslandoraMediaEntitySubscriber implements EventSubscriberInterface {
+class IslandoraMediaEventSubscriber implements EventSubscriberInterface {
 
   /**
    * {@inheritdoc}
