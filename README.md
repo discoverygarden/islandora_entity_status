@@ -3,6 +3,17 @@
 
 Cascades entity status to all referenced entities in an Islandora repository item
 
+## Usage
+When and What operation we are performing.
+- Node Update
+ -  On status change update all media and assign same status.
+ - If node is collection
+    - Show confirmation popup before save.
+    - on status change or workflow status change
+      - update status of all attached nodes and respective attached media.
+- Media presave
+   - Assign the status of the Media Of node.
+
 ## Requirements
 
 This module requires the following modules/libraries:
