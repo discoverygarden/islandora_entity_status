@@ -47,7 +47,6 @@ further information.
 drush islandora_entity_status:furnd --nodes="1,2,3" --status=1
 ```
 
-
 ## Troubleshooting/Issues
 
 Having problems or solved a problem? Contact [discoverygarden](http://support.discoverygarden.ca).
