@@ -51,12 +51,14 @@ drush islandora_entity_status:furnd --nodes="1,2,3" --status=1
 
 Having problems or solved a problem? Contact [discoverygarden](http://support.discoverygarden.ca).
 
-## Maintainers/Sponsors
-
-This project has been sponsored by:
-
+## Sponsors
 * Boston College
-* [discoverygarden](http://wwww.discoverygarden.ca)
+* Atlanta University Center
+
+## Maintainers
+Current maintainers:
+
+* [discoverygarden](http://www.discoverygarden.ca)
 
 ## Development/Contribution
 
