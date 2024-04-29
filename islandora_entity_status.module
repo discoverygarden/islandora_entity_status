@@ -53,7 +53,7 @@ function islandora_entity_status_node_update(EntityInterface $entity) {
     }
 
     // Trigger the batch process for collection node.
-    $node_ids_to_update = find_collection_nodes($nid);
+    $node_ids_to_update = islandora_entity_status_find_collection_nodes($nid);
     $latestStatus = $entity->get('status')->value;
 
     islandora_entity_status_trigger_batch_process($node_ids_to_update, $latestStatus);
@@ -78,7 +78,7 @@ function islandora_entity_status_form_node_islandora_object_edit_form_alter(&$fo
 /**
  * Find related nodes.
  */
-function find_collection_nodes($currentNodeId) {
+function islandora_entity_status_find_collection_nodes($currentNodeId) {
   $relatedNodeIds = [];
 
   // Initial query to find nodes where the field_member_of contains
