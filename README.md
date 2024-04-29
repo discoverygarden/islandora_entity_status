@@ -56,6 +56,7 @@ Having problems or solved a problem? Contact [discoverygarden](http://support.di
 
 This project has been sponsored by:
 
+* Boston College
 * [discoverygarden](http://wwww.discoverygarden.ca)
 
 ## Development/Contribution
