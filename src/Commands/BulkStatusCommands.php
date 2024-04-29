@@ -3,9 +3,9 @@
 namespace Drupal\islandora_entity_status\Commands;
 
 use Drupal\Core\DependencyInjection\DependencySerializationTrait;
-use Drush\Commands\DrushCommands;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drush\Commands\DrushCommands;
 
 /**
  * Drush command implementation.
