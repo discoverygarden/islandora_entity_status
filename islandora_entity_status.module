@@ -129,12 +129,15 @@ function islandora_entity_status_batch_operation($node_ids, $node_status, &$cont
   // Update the status for each related node.
   foreach ($node_ids as $relatedNodeId) {
     $relatedNode = Node::load($relatedNodeId);
-    $relatedNode->set('status', $node_status);
-    $relatedNode->save();
 
-    // Update the progress.
-    $context['results'][] = t('Node %node processed and status set to %status.',
-      ['%node' => $relatedNodeId, '%status' => $node_status]);
+    if (!empty($relatedNode)) {
+      $relatedNode->set('status', $node_status);
+      $relatedNode->save();
+
+      // Update the progress.
+      $context['results'][] = t('Node %node processed and status set to %status.',
+        ['%node' => $relatedNodeId, '%status' => $node_status]);
+    }
   }
 }
 
