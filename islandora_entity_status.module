@@ -167,7 +167,6 @@ function islandora_entity_status_batch_finished($success, $results, $operations)
   }
 }
 
-
 /**
  * Implements hook_entity_delete().
  */

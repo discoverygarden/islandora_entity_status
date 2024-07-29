@@ -41,4 +41,5 @@ class IslandoraNodeDeleteSubscriber {
       $custom_entity->delete();
     }
   }
+
 }
