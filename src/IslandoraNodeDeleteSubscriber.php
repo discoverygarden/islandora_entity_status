@@ -5,6 +5,9 @@ namespace Drupal\islandora_entity_status;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\NodeInterface;
 
+/**
+ * Subscriber to handle deletion of related Embargoes when a node is deleted.
+ */
 class IslandoraNodeDeleteSubscriber {
 
   /**
@@ -25,13 +28,12 @@ class IslandoraNodeDeleteSubscriber {
   }
 
   /**
-   * Deletes the associated custom entity.
+   * Deletes the associated embargos.
    *
    * @param \Drupal\node\NodeInterface $node
    *   The Islandora object node being deleted.
    */
   public function deleteAssociatedCustomEntity(NodeInterface $node): void {
-    // Replace 'your_custom_entity_type' with the actual machine name of your custom entity type.
     $custom_entity_storage = $this->entityTypeManager->getStorage('embargo');
     $custom_entities = $custom_entity_storage->loadByProperties(['embargoed_node' => $node->id()]);
 
