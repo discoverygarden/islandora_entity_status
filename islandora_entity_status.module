@@ -5,6 +5,7 @@
  * Hook implementations.
  */
 
+use Drupal\Core\Entity\ContentEntityInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\islandora\IslandoraUtils;
@@ -163,5 +164,20 @@ function islandora_entity_status_batch_finished($success, $results, $operations)
   else {
     // Batch processing failed.
     $messenger->addError(t('Batch processing failed.'));
+  }
+}
+
+
+/**
+ * Implements hook_entity_delete().
+ */
+function islandora_entity_status_entity_delete(EntityInterface $entity) {
+  if (!$entity instanceof ContentEntityInterface) {
+    return;
+  }
+
+  // Check if the entity is a node with the bundle "islandora_object".
+  if ($entity->hasField(IslandoraUtils::MEMBER_OF_FIELD)) {
+    \Drupal::service('islandora_entity_status.islandora_node_delete_subscriber')->deleteAssociatedCustomEntity($entity);
   }
 }
